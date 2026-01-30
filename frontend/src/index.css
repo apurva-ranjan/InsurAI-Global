@@ -1,0 +1,7 @@
+body { background-color: #f8f9fa; font-family: 'Inter', sans-serif; }
+.bg-soft-primary { background-color: #e7f1ff; }
+.bg-soft-success { background-color: #e6fcf5; }
+.card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; }
+.card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
+.nav-link { padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 2px; transition: 0.2s; }
+.nav-link:hover { background-color: rgba(255,255,255,0.1); }
