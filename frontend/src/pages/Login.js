@@ -14,7 +14,7 @@ const Login = () => {
     const loadToast = toast.loading("Verifying Identity...");
 
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', {
+      const response = await axios.post('insurai-global-production.up.railway.app/api/auth/login', {
         email: email,
         password: password
       });
