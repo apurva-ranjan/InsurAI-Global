@@ -14,24 +14,50 @@ const Login = () => {
     const loadToast = toast.loading("Verifying Identity...");
 
     try {
-      const response = await axios.post('insurai-global-production.up.railway.app/api/auth/login', {
-        email: email,
-        password: password
-      });
+      // FIX 1: Added https:// protocol to the URL
+      // FIX 2: Added withCredentials: true to match SecurityConfig.java
+      const response = await axios.post(
+        'https://insurai-global-production.up.railway.app/api/auth/login', 
+        {
+          email: email,
+          password: password
+        },
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-      if (response.data.status === "success") {
+      // Support both explicit status and standard HTTP success codes
+      if (response.data.status === "success" || response.status === 200) {
         // --- DATA SYNC MODIFICATION ---
         localStorage.setItem('isAuthenticated', 'true');
+        
         // Stores the actual user object from MySQL
-        localStorage.setItem('user', JSON.stringify(response.data.user)); 
+        if (response.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
+        
         localStorage.setItem('sessionToken', response.data.token || 'secure-session-789');
         
         toast.success("Identity Verified. Access Granted.", { id: loadToast });
+        
+        // Ensure you have a route defined for '/' or change to '/dashboard'
         navigate('/');
       }
     } catch (error) {
-      console.error("Login Error:", error);
-      const msg = error.response?.status === 401 ? "Invalid Email or Password" : "Server Connection Failed";
+      console.error("Login Error Details:", error.response || error);
+      
+      // FIX 3: Improved error messaging
+      let msg = "Server Connection Failed";
+      if (error.response?.status === 401) {
+        msg = "Invalid Email or Password";
+      } else if (error.response?.data?.message) {
+        msg = error.response.data.message;
+      }
+      
       toast.error(msg, { id: loadToast });
     }
   };
