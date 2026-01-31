@@ -9,7 +9,7 @@ const Signup = () => {
     name: '',
     email: '',
     password: '',
-    role: 'USER' // Matches the role column in your MySQL table
+    role: 'USER'
   });
   
   const navigate = useNavigate();
@@ -23,17 +23,36 @@ const Signup = () => {
     const loadToast = toast.loading("Creating Secure Account...");
 
     try {
-      // Sending data to your Spring Boot /api/auth/register endpoint
-      const response = await axios.post('https://insurai-global-production.up.railway.app/api/auth/register', formData);
+      const response = await axios.post(
+        'https://insurai-global-production.up.railway.app/api/auth/register', 
+        formData,
+        {
+          // ADDITION 1: Explicitly allow credentials for CORS handshake
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-      if (response.data.status === "success") {
+      // ADDITION 2: Support both string status and boolean success flags
+      if (response.data.status === "success" || response.status === 200 || response.status === 201) {
         toast.success("Account Created! You can now login.", { id: loadToast });
         navigate('/login');
       }
     } catch (error) {
-      console.error("Signup Error:", error);
-      // Detailed error logging to help you debug
-      const errorMsg = error.response?.data || "Registration failed. Check backend connection.";
+      console.error("Signup Error Details:", error.response || error);
+      
+      // ADDITION 3: Better error message handling
+      let errorMsg = "Registration failed. Check backend connection.";
+      if (error.response) {
+        errorMsg = typeof error.response.data === 'string' 
+          ? error.response.data 
+          : (error.response.data.message || "Invalid Data");
+      } else if (error.request) {
+        errorMsg = "No response from server. Is the backend awake?";
+      }
+
       toast.error(errorMsg, { id: loadToast });
     }
   };
