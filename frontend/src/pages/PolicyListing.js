@@ -9,33 +9,49 @@ const PolicyListing = () => {
     const [loading, setLoading] = useState(true);
     const [form, setForm] = useState({ policyName: '', category: 'Health', premium: '', coverage: '' });
 
+    // Live Railway Backend URL
+    const BASE_URL = 'https://insurai-global-production.up.railway.app/api/policies';
+
     useEffect(() => { fetchPolicies(); }, []);
 
     const fetchPolicies = async () => {
         try {
-            const res = await axios.get('http://localhost:8080/api/policies');
+            // FIX: Using live URL and withCredentials for CORS
+            const res = await axios.get(BASE_URL, { withCredentials: true });
             setPolicies(res.data);
             setLoading(false);
-        } catch (err) { toast.error("Connection Failed"); }
+        } catch (err) { 
+            console.error("Fetch Error:", err);
+            toast.error("Connection Failed: Unable to fetch policies"); 
+            setLoading(false);
+        }
     };
 
     const handleSave = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:8080/api/policies/add', form);
+            // FIX: Using live URL for POST
+            await axios.post(`${BASE_URL}/add`, form, { withCredentials: true });
             toast.success("Policy Saved");
             setIsSidebarOpen(false);
             fetchPolicies();
-        } catch (err) { toast.error("Save Failed"); }
+        } catch (err) { 
+            console.error("Save Error:", err);
+            toast.error("Save Failed"); 
+        }
     };
 
     const handleDelete = async (id) => {
         if (window.confirm("Delete this policy?")) {
             try {
-                await axios.delete(`http://localhost:8080/api/policies/${id}`);
+                // FIX: Using live URL for DELETE
+                await axios.delete(`${BASE_URL}/${id}`, { withCredentials: true });
                 toast.success("Removed");
                 fetchPolicies();
-            } catch (err) { toast.error("Delete Failed"); }
+            } catch (err) { 
+                console.error("Delete Error:", err);
+                toast.error("Delete Failed"); 
+            }
         }
     };
 
@@ -136,25 +152,22 @@ const PolicyListing = () => {
             )}
 
             <style>{`
-                /* Grid responsiveness */
                 .bg-soft-blue { background-color: #e7f1ff; }
                 .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
                 .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
 
-                /* Sidebar responsiveness */
                 .sidebar-overlay { 
                     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
                     background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); 
                     z-index: 2000; display: flex; justify-content: flex-end; 
                 }
                 .sidebar-drawer { 
-                    width: 100%; /* Default to full width on mobile */
-                    max-width: 450px; /* Limit on larger screens */
+                    width: 100%;
+                    max-width: 450px;
                     background: white; height: 100%; overflow-y: auto; 
                 }
                 .cursor-pointer { cursor: pointer; }
 
-                /* Mobile tweaks */
                 @media (max-width: 576px) {
                     .container { padding-left: 20px; padding-right: 20px; }
                     .sidebar-drawer { max-width: 100%; }
