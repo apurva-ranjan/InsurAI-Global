@@ -24,7 +24,7 @@ const Signup = () => {
 
     try {
       // Sending data to your Spring Boot /api/auth/register endpoint
-      const response = await axios.post('http://localhost:8080/api/auth/register', formData);
+      const response = await axios.post('https://insurai-global-production.up.railway.app/api/auth/register', formData);
 
       if (response.data.status === "success") {
         toast.success("Account Created! You can now login.", { id: loadToast });
